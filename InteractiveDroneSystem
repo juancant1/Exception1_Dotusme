@@ -1,0 +1,116 @@
+import java.util.Scanner;
+
+class InvalidCargoException extends Exception // Custom checked exception for invalid cargo slot access
+{
+    public InvalidCargoException(String message) // Constructor to pass the error message to the superclass
+    {
+        super(message);
+    }
+}
+
+public class InteractiveDroneSystem 
+{
+    private static final double[] cargoWeights = {12.5, 8.0, 15.2, 10.4}; // Sample cargo weights in kilograms
+
+    // 2. Array Validation Method (Throws checked exception)
+    public static void inspectCargoSlot(int slotIndex) throws InvalidCargoException // Method to inspect cargo slot weight, throws InvalidCargoException if index is invalid
+    {
+        if (slotIndex < 0 || slotIndex >= cargoWeights.length) 
+        {
+            throw new InvalidCargoException("Error: Slot index " + slotIndex + " is out of bounds. Valid range: 0 to " + (cargoWeights.length - 1) + "."); // Throwing checked exception for invalid cargo slot access
+        }
+        System.out.printf("Cargo weight at slot %d: %.1f kg\n", slotIndex, cargoWeights[slotIndex]); // Displaying the cargo weight at the specified slot index 
+    }
+
+    public static double calculateEfficiency(double totalEnergyUsed, double distanceTraveled) // Method to calculate flight efficiency (Wh/km)
+    {
+        if (distanceTraveled == 0.0) 
+        {
+            throw new ArithmeticException("Error: Distance traveled cannot be zero (division by zero).");
+        }
+        return totalEnergyUsed / distanceTraveled;
+    }
+
+    public static void main(String[] args) 
+    {
+        Scanner scanner = new Scanner(System.in); // Scanner object to read user input from the console
+        boolean running = true; // Flag to control the main loop for the interactive console
+
+        while (running) 
+            {
+            System.out.println("\n=== Smart Drone Control Console ===");
+            System.out.println("1. Inspect Cargo Slot");
+            System.out.println("2. Calculate Flight Efficiency");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+
+            if (!scanner.hasNextInt()) // Check if the input is a valid integer for menu selection
+            {
+                System.out.println("Invalid input. Please enter a valid menu number.");
+                scanner.next();
+                continue;
+            }
+
+            int choice = scanner.nextInt(); // Read the user's menu choice
+
+            switch (choice) 
+            {
+                case 1: // Inspect Cargo Slot
+                    System.out.print("Enter cargo slot index (0 - 3): "); 
+                    if (scanner.hasNextInt()) // Check if the input is a valid integer for cargo slot index
+                    {
+                        int slotIndex = scanner.nextInt(); // Read the cargo slot index from user input
+                        try 
+                        {
+                            inspectCargoSlot(slotIndex); // Call the method to inspect the cargo slot, which may throw InvalidCargoException
+                        } catch (InvalidCargoException e)  // Catch the checked exception and display the error message
+                        {
+                            System.out.println("[Exception Caught] " + e.getMessage()); // Displaying the error message from the caught exception
+                        }
+                    } else 
+                    {
+                        System.out.println("Invalid slot index format.");
+                        scanner.next();
+                    }
+                    break;
+
+                case 2: // Calculate Flight Efficiency
+                    System.out.print("Enter total energy used (Wh): ");
+                    while (!scanner.hasNextDouble())  // Check if the input is a valid double for energy used
+                    {
+                        System.out.println("Invalid numeric input. Enter energy used (Wh): "); 
+                        scanner.next();
+                    }
+                    double energy = scanner.nextDouble(); // Read the total energy used from user input
+
+                    System.out.print("Enter distance traveled (km): ");
+                    while (!scanner.hasNextDouble()) 
+                    {
+                        System.out.println("Invalid numeric input. Enter distance traveled (km): ");
+                        scanner.next();
+                    }
+                    double distance = scanner.nextDouble(); // Read the distance traveled from user input
+
+                    try 
+                    {
+                        double efficiency = calculateEfficiency(energy, distance); // Call the method to calculate flight efficiency, which may throw ArithmeticException
+                        System.out.printf("Flight Efficiency: %.2f Wh/km\n", efficiency);
+                    } catch (ArithmeticException e) // Catch the unchecked exception and display the error message
+                    {
+                        System.out.println("[Exception Caught] " + e.getMessage());
+                    }
+                    break;
+
+                case 3: // Exit the console
+                    System.out.println("Shutting down drone control console. Goodbye.");
+                    running = false;
+                    break;
+
+                default:
+                    System.out.println("Invalid option. Please select 1, 2, or 3.");
+                    break;
+            }
+        }
+        scanner.close(); // Close the scanner to free up resources
+    }
+}
